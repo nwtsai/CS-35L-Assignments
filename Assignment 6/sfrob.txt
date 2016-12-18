@@ -1,0 +1,76 @@
+I first made files of differing input lines using C++:
+100lines     – file with 100     lines
+1000lines    – file with 1000    lines
+10000lines   – file with 10000   lines
+100000lines  – file with 100000  lines
+1000000lines – file with 1000000 lines
+
+Then, I ran these commands on each file:
+  time ./sfrob < 100lines > output_sfrob
+  time ./sfrobu < 100lines > output_sfrobu
+I repeated the above for all respective files.
+
+Here are the differences between the performances of sfrob and sfrobu (in seconds):
+
+| # of    |           sfrob         |	        sfrobu         |
+| lines   |  real  |  user  | sys   |  real  |  user  |  sys   |
+| 100     |  0.004 |  0.001 | 0.000 |  0.008 |  0.001 |  0.005 |
+| 1000    |  0.008 |  0.002 | 0.003 |  0.049 |  0.004 |  0.041 |
+| 10000   |  0.041 |  0.031 | 0.003 |  0.468 |  0.046 |  0.415 |
+| 100000  |  0.388 |  0.346 | 0.006 |  3.067 |  0.287 |  2.745 |
+| 1000000 |  2.228 |  1.682 | 0.043 | 28.606 |  1.851 | 26.346 |
+
+The data tells us that sfrob is around 10x faster in time performance compared to sfrobu
+
+Here are the number of comparisons that sfrobu makes for each respective input file:
+
+| # lines  | Comparisons |
+| 100      | 534         |
+| 1000     | 8725        |
+| 10000    | 120483      |
+| 100000   | 1536192     |
+| 1000000  | 18674104    |
+
+I used a linear regression calculator to find the # of comparisons as a function
+of the # of lines:
+
+Let n = # of lines
+
+# of comparisons = 18.749n - 98360.198
+
+Now, I will write a shell script named sfrobs and then compare its performance to 
+the two programs above:
+
+[tsain@lnxsrv02 ~/CS35L/assign6]$ time ./sfrobs < 100lines > output_sfrobs
+real	0m0.007s
+user	0m0.002s
+sys	    0m0.003s
+
+[tsain@lnxsrv02 ~/CS35L/assign6]$ time ./sfrobs < 1000lines > output_sfrobs
+real	0m0.014s
+user	0m0.001s
+sys	    0m0.007s
+
+[tsain@lnxsrv02 ~/CS35L/assign6]$ time ./sfrobs < 10000lines > output_sfrobs
+real	0m0.020s
+user	0m0.009s
+sys	    0m0.006s
+
+[tsain@lnxsrv02 ~/CS35L/assign6]$ time ./sfrobs < 100000lines > output_sfrobs
+real	0m0.148s
+user	0m0.107s
+sys	    0m0.023s
+
+[tsain@lnxsrv02 ~/CS35L/assign6]$ time ./sfrobs < 1000000lines > output_sfrobs
+real	0m1.607s
+user	0m0.923s
+sys	    0m0.146s
+
+Conclusions:
+  - sfrob is always faster than sfrobu by a factor of 10
+  - sfrobs is always faster than sfrobu
+  - at 100 and 1000 lines, sfrobs is slower than sfrob
+  - from 10000 lines and onwards, sfrobs is much faster than sfrob
+
+Overall, it seems like the script sfrobs does better with larger sets of data 
+compared to the two C programs.

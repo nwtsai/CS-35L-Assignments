@@ -1,0 +1,141 @@
+1. I made a file called tr2b.c that uses getchar and putchar to 
+transliterate bytes. I compiled the file and made an executable with:
+  gcc -std=c99 -o tr2b tr2b.c
+
+2. I made a file called tr2u.c that uses read and write to 
+transliterate bytes. I compiled the file and made an executable with:
+  gcc -std=c99 -o tr2u tr2u.c
+
+3. I made a file with 5,000,000 bytes by writing a C++ function:
+
+#include <iostream>
+using namespace std;
+
+int main()
+{
+  for (int i = 0; i < 5000000; i++)
+  {
+    cout << 'a';
+  }
+}
+
+I named this file makeBigFile.cpp
+I used the command:
+  g++ -o makeBigFile makeBigFile.cpp
+to compile the file and make an executable.
+Then, I typed the command:
+  ./makeBigFile > input.txt
+to write a 5000000 byte file into input.txt.
+
+I used strace to test:
+
+(a) Copying one file to another
+
+I used the command:
+  strace -c ./tr2b 'a' 'x' < input.txt > tr2bOutput
+to get this output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000059           1        79           read
+  0.00    0.000000           0        77           write
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0        10           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000059                   182         1 total
+
+I used the command:
+  strace -c ./tr2u 'a' 'x' < input.txt > tr2uOutput
+to get this output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 57.46    0.728204           0   5000000           write
+ 42.54    0.539051           0   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         8           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    1.267255              10000024         1 total
+
+tr2b finished a lot faster, and only required 182 system calls, 
+whereas tr2u required 10000024 system calls. 
+
+(b) Copying one file to the terminal
+
+I used the command:
+  strace -c ./tr2b 'a' 'x' < input.txt
+to get this output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000209           0      4883           write
+  0.00    0.000000           0        79           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         4           fstat
+  0.00    0.000000           0        10           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.000209                  4988         1 total
+
+I used the command:
+  strace -c ./tr2u 'a' 'x' < input.txt
+to get this output:
+% time     seconds  usecs/call     calls    errors syscall
+------ ----------- ----------- --------- --------- ----------------
+ 56.47    0.268988           0   5000000           write
+ 43.53    0.207328           0   5000002           read
+  0.00    0.000000           0         2           open
+  0.00    0.000000           0         2           close
+  0.00    0.000000           0         2           fstat
+  0.00    0.000000           0         8           mmap
+  0.00    0.000000           0         3           mprotect
+  0.00    0.000000           0         1           munmap
+  0.00    0.000000           0         1           brk
+  0.00    0.000000           0         1         1 access
+  0.00    0.000000           0         1           execve
+  0.00    0.000000           0         1           arch_prctl
+------ ----------- ----------- --------- --------- ----------------
+100.00    0.476316              10000024         1 total
+
+tr2b finished a lot faster, and only required 4988 system calls,
+whereas tr2u required 10000024 system calls.
+
+4.
+I used the command 'time' for tr2b.c: 
+  time ./tr2b 'abc' 'xyz' < input.txt > tr2bOutput
+and got this output:
+
+real	0m0.580s
+user	0m0.509s
+sys	  0m0.006s
+
+Then I used the command 'time' for tr2u.c:
+  time ./tr2u 'abc' 'xyz' < input.txt > tr2uOutput
+and got this output:
+
+real	0m5.273s
+user	0m0.349s
+sys	  0m4.858s
+
+It is clear that because tr2b uses fewer expensive system calls,
+the performance time of tr2b is a lot better (faster) compared to
+the performance time of tr2u, which is a lot worse (slower). 

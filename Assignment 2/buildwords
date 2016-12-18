@@ -1,0 +1,37 @@
+#!/bin/bash
+
+# Delete the text from the beginning of the document to the first English word
+sed '/<!DOCTYPE/,/Adopt<\/td>/d' |
+
+# Delete the text from table tag to the end of the document
+sed '/<\/table>/,/<\/html>/d' |
+
+# Convert all upper case letters to lower case letters
+tr '[:upper:]' '[:lower:]' |
+
+# Delete all English words that are sandwiched between <tr> and </td>
+sed '/<tr>/,/<\/td>/d' |
+
+# Delete all strings of characters that start and end in html bracket format
+sed 's/<[^>]*>//g' |
+
+# Replace ` (grave accent) with ' (apostrophe)
+sed s/\`/\'/g |
+
+# Replace commas with new lines 
+sed 's/\,/\n/g' |
+
+# Replace all spaces with new lines to separate sentences into individual words
+sed 's/ /\n/g' |
+
+# Get rid of all words that contain the illegal hyphen character
+sed '/-/d' |
+
+# Get rid of the mispelled Hawaiian words
+tr -cs "pk\'mnwlhaeiou" '[\n*]' |
+
+# Get rid of all the empty lines
+sed '/^$/d' |
+
+# Sort the Hawaiian words using the sort -u command
+sort -u

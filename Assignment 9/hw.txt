@@ -1,0 +1,32 @@
+1. Yes, because we are implementing asymmetric encryption. Even though they
+have acces to the public keys, they are not able to decrypt any messages, 
+because they do not have access to the generated private key.
+
+(1) Would my answer change if tapped our keyboards and recorded our keystrokes?
+My answer would not change. The network is still secure because all I did was 
+encrypt using the public key. The private key is generated, and even if they 
+use the same passphrase, the private key generated will be different.
+
+(2) Would my answer change if they temporarily had control of the USB that I used
+to boot?
+The answer depends on if my system files were also located on the USB.
+-The network would not be secure if my system files are on the USB because then they
+would be able to find the private key that would allow them to decrypt my encrypted
+messages.
+-The network would be secure if my system files were not located on the USB.
+Without the private key, they would not be able to decrypt my encrypted messages.
+
+2. The command gpg --verify doesn't actually verify the identity of who made it.
+Specifically, the command verifies if the target file matches the detached signature.
+Other people can check my public keys with this command. However, someone could 
+replace the public key and recreate the tarball. Once they do that, they can output
+a detached signature with my email as well as my name. The command has no way of
+verifying the identity of who made the tarball; it can only match the target file
+with its detached signature.
+
+One way to fix this problem is to post my public key online for all to see along with
+my tar file download link. Thus, someone could verify that I made the file and they
+would also be able to see the modifications made to the file. 
+
+This way, a CA (Certificate Authority) could verify that the user has the correct key 
+from the correct owner.

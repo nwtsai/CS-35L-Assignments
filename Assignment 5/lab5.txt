@@ -1,0 +1,164 @@
+I clicked the link on the website to download the buggy version of coreutils
+Once it was in my Downloads folder, I typed:
+  scp /Users/nwtsai/Downloads/coreutils-with-bug.tar tsain@lnxsrv02.seas.ucla.edu:/u/cs/ugrad/tsain/CS35L/assign5
+to copy the tar file onto my linux server account
+
+Then, I extracted the file with
+  tar -xvf coreutils coreutils-with-bug.tar
+
+I navigated into the directory with:
+  cd coreutils-with-bug
+
+Then, I read the INSTALL file and learned that I needed to type:
+  ./configure
+  make
+  make check
+in order to build this old version
+
+I ran into many errors, telling me that the same function appeared in two locations
+with different parameters. The patch fixes the function-name problem.
+I want to patch coreutils with a renaming-patch to avoid these errors.
+
+Now, try this again with a renaming patch pulled from the website with:
+  wget http://web.cs.ucla.edu/classes/fall16/cs35L/assign/coreutils.diff
+This will save the patch into a file called coreutils.diff
+
+To apply the patch, I typed:
+  patch -p0 < coreutils.diff
+  make
+  make check
+
+This time, the errors that occurred before this patch was applied no longer exist.
+The patch fixes the naming error and renamed it so the same function doesn't appear
+twice in the file.
+
+Now I want to test the ls function:
+
+The bug is evident because file with the year 1918 appears before my 2016 files.
+
+  tmp=$(mktemp -d)
+  cd $tmp
+  touch -d '1918-11-11 11:00 GMT' wwi-armistice
+  touch now
+  sleep 1
+  touch now1
+  TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+This outputs the buggy output, where past date is ahead of other dates:
+
+-rw-r--r-- 1 tsain csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 04:51:57.195175933 +0000 now1
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 04:51:52.268996632 +0000 now
+
+To test what's wrong with this ls, I will use the debugger.
+  gdb ~/CS35L/assign5/coreutils-with-bug/src/ls
+  print functions
+I pressed enter until I saw the sort_files function
+  break sort_files
+  run
+  list
+I looked at the code around this function until I saw:
+2975            func = sort_reverse ? rev_cmp_mtime : compare_mtime;
+I think that the problem is probably occurring in the cmp_mtime function.
+I typed q to quit, and then ran the debugger again.
+  gdb ~/CS35L/assign5/coreutils-with-bug/src/ls
+
+  break sort_files
+Breakpoint 1 at 0x4026e0: file ls.c, line 2954.
+
+  break compare_mtime  
+Breakpoint 2 at 0x404990: compare_mtime. (2 locations)
+
+  run -lt --full-timee wwi-armstice now now1
+Starting program: /w/home.07/cs/ugrad/tsain/CS35L/assign5/coreutils-with-bug/src/ls -lt --full-time wwi-armstice now now1
+[Thread debugging using libthread_db enabled]
+Using host libthread_db library "/lib64/libthread_db.so.1".
+
+I stepped until I reached Breakpoint 2.
+I continued to step until I found the line:
+49    return diff ? diff : a.tv_nsec - b.tv_nsec;
+I typed 
+  info locals
+diff = 1477630317
+
+This doesn't seem right. The difference between seconds should not be this big. The problem may happen 
+because of the overflow resulting from the subtraction.
+
+I quit the debugger, and then navigated to the lib directory in coreutils-with-bug.
+I typed 
+  cp timespec.h ../../timespec.h
+to copy the file into my working directory.
+I typed emacs timespec.h to change how the time is calculated in order to avoid overflow.
+
+Here is what I modified:
+I used direct comparison to avoid overflow. This avoids the bug that occurrs when ordering files.
+
+/* Return negative, zero, positive if A < B, A == B, A > B, respectively.
+   Assume the nanosecond components are in range, or close to it.  */
+
+static inline int
+timespec_cmp (struct timespec a, struct timespec b)
+{
+  return a.tv_sec > b.tv_sec ? 1 : (a.tv_sec < b.tv_sec ? -1 : a.tv_nsec - b.tv_nsec);
+}
+
+To make a patch after this change, I typed:
+  diff -u coreutils-with-bug/lib/timespec.h timespec.h > coreutils-with-bug/patch.diff
+
+I typed emacs C-x 4 a and added an entry to the ChangeLog.
+Then, I copied the ChangeLog into a file called lab5.diff, and then appended the 
+patch.diff file onto my lab5.diff file by typing:
+  cat patch.diff >> lab5.diff
+I typed emacs lab5.diff and changed both path names to lib/timespec.h because this diff file
+is located in the coreutils-with-bug directory.
+
+Now I apply the patch with:
+  patch -p0 < lab5.diff
+This outputs:
+  patching file lib/timespec.h
+
+I recompile coreutils with:
+  make
+
+To see if my patch correctly fixed the bug, I typed this into the command line:
+  tmp=$(mktemp -d)
+  cd $tmp
+  touch -d '1918-11-11 11:00 GMT' wwi-armistice
+  touch now
+  sleep 1
+  touch now1
+  TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+My output is correct:
+
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 05:30:20.120986803 +0000 now1
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 05:30:14.966799310 +0000 now
+-rw-r--r-- 1 tsain csugrad 0 1918-11-11 11:00:00.000000000 +0000 wwi-armistice
+
+The 1918 file gets outputted at the end. The integer overflow that previously caused
+the bug is no longer a problem, because I used direct comparison.
+
+Now I want to test this on a SEASnet machine:
+  cd ~
+  touch -d '1918-11-11 11:00 GMT' wwi-armistice
+  touch now
+  sleep 1
+  touch now1
+  TZ=UTC0 ls -lt --full-time wwi-armistice now now1
+
+My output is weird, the date shows the future date of 2054:
+
+-rw-r--r-- 1 tsain csugrad 0 2054-12-17 17:28:16.000000000 +0000 wwi-armistice
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 05:33:37.087364000 +0000 now1
+-rw-r--r-- 1 tsain csugrad 0 2016-10-28 05:33:32.343545000 +0000 now
+
+This might be the case because the server can't recognize the time '1918-11-11 11:00 GMT'
+Instead, it interprets this time as '2054-12-17 17:28:16'
+
+SEASnet does not do very well. The linux system runs on a 64-bit system,
+and the SEASnet runs on a 32-bit system. In the 64-bit system, there is a
+sign bit that tells you whether or not a file is in the past or in the future.
+The 32-bit system probably truncated the first 32 bits of the 64-bit notation, so
+the sign bit gets dropped. This loss of precision results in the SEASnet machine
+thinking that the 1918 file was actually made far into the future, because the sign
+bit is positive after truncation.

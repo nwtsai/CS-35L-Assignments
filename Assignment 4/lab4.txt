@@ -1,0 +1,203 @@
+1. I used the command
+  git clone git://git.savannah.gnu.org/diffutils.git
+to get a copy of the diffutils repository in git format.
+
+2. I navigated to the diffutils directory with
+  cd diffutils
+and then typed the command
+  git log > ../git-log.txt
+to get the log of changes to the master branch into a file
+located one directory above the working directory.
+
+3. I typed the command
+  git tag > ../git-tags.txt
+to get the list of tags used for diffutils into a file
+located one directory above the working directory.
+
+4. I navigated up one directory by typing cd ../
+I opened the file git-log.txt using emacs by typing
+  emacs git-log.txt
+and then I used the Emacs commands to search for the text:
+  C-s maint: quote 'like this' or "like this", not `like this'
+I found the corresponding git address, and then typed
+  git format-patch -1 62ca21c8c1a5aa3488589dcb191a4ef04ae9ed4f 
+  --stdout > ../quote-patch.txt
+to generate a patch for that commit and put it into a file
+in a directory above my working directory, so git clean won't
+delete this file.
+
+5. I checked out version 3.0 with
+  git checkout v3.0
+
+6. I used the command
+  patch -p1 < ../quote-patch.txt
+to apply the patch. I pressed Enter y Enter to skip 3 files.
+The 3 out of 14 hunks FAILED, and the rejects were saved in src.
+
+7. I typed
+  git status
+and got this output:
+
+# HEAD detached at v3.0
+# Changes not staged for commit:
+#   (use "git add <file>..." to update what will be committed)
+#   (use "git checkout -- <file>..." to discard changes in working directory)
+#
+# modified:   NEWS
+# modified:   README
+# modified:   TODO
+# modified:   doc/diagmeet.note
+# modified:   ms/config.bat
+# modified:   ms/config.site
+# modified:   po/en.po
+# modified:   src/analyze.c
+# modified:   src/cmp.c
+# modified:   src/context.c
+# modified:   src/diff.c
+# modified:   src/diff.h
+# modified:   src/diff3.c
+# modified:   src/dir.c
+# modified:   src/ifdef.c
+# modified:   src/io.c
+# modified:   src/sdiff.c
+# modified:   src/side.c
+# modified:   src/system.h
+# modified:   src/util.c
+# modified:   tests/help-version
+#
+# Untracked files:
+#   (use "git add <file>..." to include in what will be committed)
+#
+# NEWS.orig
+# README-hacking.orig
+# README-hacking.rej
+# README.orig
+# README.rej
+# cfg.mk.orig
+# cfg.mk.rej
+# git-log.txt
+# git-tags.txt
+# ms/config.site.orig
+# quote-patch.txt
+# src/cmp.c.orig
+# src/context.c.orig
+# src/diff.c.orig
+# src/diff.c.rej
+# src/diff.h.orig
+# src/diff3.c.orig
+# src/diff3.c.rej
+# src/dir.c.orig
+# src/sdiff.c.orig
+# src/system.h.orig
+# src/util.c.orig
+# tests/help-version.orig
+no changes added to commit (use "git add" and/or "git commit -a")
+
+8. I used the links provided in the specs to learn about the different Emacs
+commands on revision and undoing version control actions.
+
+9. Use emacs to open all files: Then use these commands:
+  C-x v u
+to revert the recent changes on the files.
+Repeat this process for the following non .c files:
+
+NEWS
+README
+TODO
+doc/diagmeet.note
+ms/config.bat
+ms/config.site
+po/en.po
+src/diff.h
+src/system.h
+tests/help-version
+
+Next, I need to go into each c file and check if I needed to revert.
+Then, to check the specific changes that needed to be made, I typed:
+  emacs src/analyze.c C-x v =
+This utilizes v-diff to see what changes were performed.
+
+I only want to change the hunks that don't have character-constants,
+so I was mostly changing hunks located in comment blocks.
+
+If I wanted to revert the hunk, I typed
+  C-c C-a y
+If I didn't want to revert the change, I went to the next hunk with
+  M-n
+
+I did this for all modified .c files.
+
+Here are the lines of each file that were reverted:
+
+  analyze.c: reverted every changed line
+  cmp.c: 36, 364, 377
+  context.c: reverted every changed line
+  diff.c: 40, 57, 92
+  diff3.c: 35, 159, 1475
+  dir.c: 84, 125, 234
+  ifdef.c: reverted every changed line
+  io.c: reverted every changed line
+  sdiff.c: 35, 92, 747
+  side.c: reverted every changed line
+  util.c: 27, 121, 146, 190, 241, 270, 650
+
+10. I typed
+  emacs src/*.c.rej
+to see which rejected patches needed to be manually applied.
+I made changes in src/diff3.c and src/diff.c to manually apply 
+the patch.
+
+11. I used 
+  git clean -f
+to remove all untracked files.
+
+12. Then, I typed git status and got this output:
+
+# modified:   src/cmp.c
+# modified:   src/diff.c
+# modified:   src/diff3.c
+# modified:   src/dir.c
+# modified:   src/sdiff.c
+# modified:   src/util.c
+
+Then, I typed:
+  git diff > ../quote-3.0-patch.txt
+to store the patch into a file in the
+directory above my working directory.
+
+13. I logged into linux server02 and used the following commands to build:
+  ./bootstrap
+  ./configure
+  make
+  make check
+
+The build succeeded and diff works as it was intended to.
+None of the outputted text had grave accents.
+
+14. I made two directories in my assign4 directory with:
+  mkdir diffutils-3.0
+  mkdir diffutils-3.0-patch
+Then, I got a copy of the original diffutils and renamed it with:
+  git clone git://git.savannah.gnu.org/diffutils.git diffutils-3.0-original
+
+Now, I want to copy the original source code into diffutils-3.0 with:
+  cp ./diffutils-3.0-original/src/*.c diffutils-3.0/
+
+I also want to copy the modified source code into diffutils-3.0-patch with:
+  cp ./diffutils/src/*.c diffutils-3.0-patch/
+
+Now, to compare the differences between the original source code and 
+the modified source code, I use the following command:
+  ./diffutils/src/diff -pru diffutils-3.0 diffutils-3.0-patch 
+  > quote-3.0-test.txt
+to store the changes into a file called quote-3.0-test.txt
+
+15. I used the command:
+  diff -u quote-3.0-test.txt quote-3.0-patch.txt
+to use diff and see the differences between the files
+quote-3.0-test.text and my quote-3.0-patch.txt located in diffutils.
+
+There seems to be many differences. The files are not identical. However,
+The differences are innocuous because the differences only seem to be paths
+or differences in the order in which the code is written. Overall, the two
+should function the same because the differences are innocuous.

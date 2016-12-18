@@ -1,0 +1,266 @@
+I want to change to the standard C locale, so I used the command:
+    export LC_ALL ='C'
+
+I first started by sorting the words file and outputting it into 
+my local directory:
+    sort -u /usr/share/dict/words > words
+
+Then, I used this command to pull the class website assignment page 
+into my directory:
+    wget http://web.cs.ucla.edu/classes/fall16/cs35L/assign/assign2.html
+
+TRYING OUT COMMANDS
+
+tr -c 'A-Za-z' '[\n*]'
+    This command replaced every non alphabetical character with a new line.
+tr -cs 'A-Za-z' '[\n*]'
+    This command eliminated everything but alphabetical characters. Similar 
+    to previous command, except non-letters are not converted to new lines.
+tr -cs 'A-Za-z' '[\n*]' | sort
+    This command elimated everything but alphabetical characters, 
+    including duplicate new lines. Each separate word gets put in its own
+    line. After doing so, the commmand sorted the entire file alphabetically. 
+    Duplicated words are not deleted.
+tr -cs 'A-Za-z' '[\n*]' | sort -u
+    This command did everything the command above did except that it deleted 
+    all duplicate words.
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm - words
+    This command is similar to the above command because it sorts the file;
+    However, this command also compares the two sorted files assign2.html 
+    and words line by line. Three columns are produced: the first column 
+    has lines unique to assign2.html, the second column has lines unique 
+    to words, and the third column has lines that appear in both files.
+tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -23 - words
+    This command is similar to the above command except that
+    it suppresses both column 2 and column 3, so that the ouput only
+    shows column 1, which are the lines that are unique to assign2.html.
+    This is essentially a spellchecker that produces the words that 
+    are 'incorrect', or mispelled, if we treat the file 'words' like a
+    dictionary.
+
+HAWAIIAN SPELL CHECKER SECTION
+
+In order to get the website of Hawaiian words into my local directory: 
+    wget http://mauimapp.com/moolelo/hwnwdseng.htm
+
+I then used the following two commands:
+    cat > buildwords
+    C-c
+    emacs buildwords
+to begin creating my buildwords script. 
+
+BUILDWORDS SCRIPT
+
+#!/bin/bash
+
+# Delete the text from the beginning of the document to the first English word
+sed '/<!DOCTYPE/,/Adopt<\/td>/d' |
+
+# Delete the text from table tag to the end of the document
+sed '/<\/table>/,/<\/html>/d' |
+
+# Convert all upper case letters to lower case letters
+tr '[:upper:]' '[:lower:]' |
+
+# Delete all English words that are sandwiched between <tr> and </td>
+sed '/<tr>/,/<\/td>/d'|
+
+# Delete all strings of characters that start and end in html bracket format
+sed 's/<[^>]*>//g' |
+
+# Replace ` (grave accent) with ' (apostrophe)
+sed s/\`/\'/g |
+
+# Replace commas with new lines
+sed 's/\,/\n/g' |
+
+# Replace all spaces with new lines to separate sentences into individual words
+sed 's/ /\n/g' |
+
+# Get rid of all words that contain the illegal hyphen character
+sed '/-/d' |
+
+# Get rid of the mispelled Hawaiian words
+tr -cs "pk\'mnwlhaeiou" '[\n*]' |
+
+# Get rid of all the empty lines
+sed '/^$/d' |
+
+# Sort the Hawaiian words using the sort -u command
+sort -u
+
+EXECUTING THE SCRIPT
+
+After learning about chmod command from assignment 1, I typed
+    chmod +x buildwords
+so that the file is able to be executed by users.
+
+I then typed this command to run the script and output it to hwords
+    cat hwnwdseng.htm | ./buildwords > hwords
+This creates a file hwords that contains all the Hawaiian words from 
+the webpage.
+
+CHECKING THE ENGLISH SPELLING
+
+First, I used the command
+    cat assign2.html | tr '[:upper:]' '[:lower:]' | tr -cs 'A-Za-z' '[\n*]' | 
+    sort -u | comm -23 - words > incorrectEnglish
+to convert all upper case letters to lower case letters, and then I took out
+all words that had non alphabetical letters. And then I put all words that 
+did not show up in words into the file incorrectEnglish, deleting duplicate 
+words.
+
+I used the command 
+    wc -w incorrectEnglish
+to count the number of incorrect English words, where I found 38 misspelled 
+English words.
+
+CHECKING THE HAWAIIAN SPELLING
+
+I used the command
+    cat assign2.html | tr '[:upper:]' '[:lower:]' | tr -cs 'A-Za-z' '[\n*]' | 
+    sort -u | comm -23 - hwords > incorrectHawaiian
+to convert all upper case letters to lower case letters, and then I took 
+out all words that had non alphabetical letters. Then, I sorted the file 
+and deleted duplicates, and then put words that did not show up in hwords 
+into the file incorrectHawaiian. I assumed that www and http and any other
+string of only alphabetical characters counted as words. 
+
+I used the command
+    wc -w incorrectHawaiian
+to count the number of incorrect Hawaiian words, where I found 405 misspelled 
+Hawaiian words.
+
+FINDING WORDS MISSPELLED IN ENGLISH BUT SPELLED CORRECTLY IN HAWAIIAN	
+
+I used the command
+    cat incorrectEnglish | tr -cs "pk\'mnwlhaeiou" '[\n*]' | sort -u | comm 
+    -12 - hwords > incorrectEnglishCorrectHawaiian
+to find the words that were misspelled in English but spelled correctly in
+Hawaiian, and store the words in the file incorrectEnglishCorrectHawaiian. 
+Here is the output of cat incorrectEnglishCorrectHawaiian:
+
+e
+halau
+i
+lau
+po
+wiki
+
+FINDING WORDS MISSPELLED IN HAWAIIAN BUT SPELLED CORRECTLY IN ENGLISH
+
+I used the command
+    cat incorrectHawaiian | tr -cs 'A-Za-z' '[\n*]' | sort -u | comm -12 - 
+    words > incorrectHawaiianCorrectEnglish    
+to find the words that were misspelled in Hawaiian but spelled correctly in 
+English, and store the words in the file incorrectHawaiianCorrectEnglish. 
+Here is the output of cat incorrectHawaiianCorrectEnglish:
+
+a
+ail
+ain
+ake
+al
+ale
+alen
+all
+amine
+amp
+ample
+an
+aph
+aul
+awk
+e
+ea
+ee
+el
+em
+emp
+en
+ep
+epa
+h
+ha
+han
+hap
+he
+hei
+hell
+hem
+hen
+hi
+hin
+ho
+how
+howe
+ia
+ie
+ile
+imp
+in
+ion
+iou
+k
+keep
+kin
+l
+lan
+le
+lea
+li
+like
+line
+link
+ll
+ln
+lo
+lowe
+m
+mail
+man
+me
+men
+mi
+ml
+mo
+mp
+n
+name
+ne
+nee
+no
+non
+nu
+num
+o
+om
+on
+one
+op
+ope
+open
+owe
+own
+p
+pe
+pell
+people
+plea
+pu
+u
+ui
+ula
+ule
+ume
+ump
+un
+uni
+w
+wa
+wan
+we
+wh
+wha
+who
+wi

@@ -1,0 +1,69 @@
+#!/bin/bash
+
+# This means that the first input variable is stored into myDir
+myDir=$1
+
+# Store the ls commands for searching for all normal files and hidden files
+normalFiles=`ls $myDir | sort`
+hiddenFiles=`ls -a $myDir | grep '^\.' | sort`
+
+# I have two separate for loops so that I can add all hidden files that start with a period into the fileArray before considering non hidden files.
+# This way, I am able to give the files with periods in front of the file names precedence over the files without periods in front of the file names. 
+# Declare an integer to keep track of the number of files considered
+
+declare -a fileArray
+count=0
+
+# Loop through the hidden files
+for hFiles in $hiddenFiles
+do
+    # if the file exists and is a symbolic link file 
+    if [ -L "$myDir/$hFiles" ] || [ ! -f "$myDir/$hFiles" ]
+    then
+	:
+    # else if the file is not readable
+    elif [ ! -r "$myDir/$hFiles" ]
+    then
+	echo "$hFiles is not readable"
+    # otherwise, add the file into the fileArray and increment the count variable
+    else
+	fileArray[$count]="$myDir/$hFiles"
+	count=$((count+1))
+    fi
+done
+
+# Loop through the normal files
+for nFiles in $normalFiles
+do
+    # if the file exists and is a symbolic link file                                    
+    if [ -L "$myDir/$nFiles" ] || [ ! -f "$myDir/$nFiles" ]
+    then
+        :
+    # else if the file is not readable                                                                 
+    elif [ ! -r "$myDir/$nFiles" ]
+    then
+        echo "$nFiles is not readable"
+    # otherwise, add the file into the fileArray and increment the count variable
+    else
+        fileArray[$count]="$myDir/$nFiles"
+        count=$((count+1))
+    fi
+done
+
+# Loop through the file array and compare files
+for (( i=0; i<$count; i++ ))
+do
+    # Within each index of the array, loop through the indexes after the current index
+    for (( j=i+1; j<$count; j++ ))
+    do
+	# Compare the current file and the files after the current file, suppressing all normal output
+        cmp -s "${fileArray[$i]}" "${fileArray[$j]}"
+	if [ $? -eq 0 ]
+	then
+	    # Forcibly make hard links directly to symbolic links
+	    ln -fP "${fileArray[$i]}" "${fileArray[$j]}"
+	    # Set any similar occurence of the second file equal to the first file
+	    fileArray[$j]=fileArray[$i]
+	fi
+    done
+done

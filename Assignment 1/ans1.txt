@@ -1,0 +1,140 @@
+1. I typed in the man man command to read about how I could use the
+man command. I learned that I could use man -k followed by a keyword
+to find all commands that include the keyword.
+
+2. I used whereis cp to find the path of cp: /usr/bin/cp   
+   I also used whereis wc to find the path of wc: /usr/bin/wc
+
+3. There are three one character executable files found with the command 
+find /usr/bin -executable -name ?. I learned about this specific command 
+from reading the man find documentation, where I learned how to use the 
+-executable command that searches for executable programs. I found the 
+description of each executable from the commands man [, man X, and man w.
+   [: this is an executable that acts as a condition evaluation utility
+   X: this is a network-transparent window system that is portable
+   w: this is an executable that displays who is currently logged in 
+   and what they are doing
+
+4. I used ls -al /usr/bin/emacs which showed me that the actual file 
+being executed is: /etc/alternatives/emacs
+
+5. The symbolic mode g+s means that the other users in the file's group 
+have permission to set user or group ID on execution of the file.  
+The symbolic mode o-x means that the other users not in the file's 
+group no longer have the ability to execute or search a directory.
+In regards to permissions, users in the file's group are allowed to set 
+user or group ID upon execution and users not in the file's group do 
+not have the ability to execute or search.
+I found these commands by reading the documentation provided by the 
+command man chmod.
+
+6. In order to see all files modified within the last 3 weeks, I typed 
+in find -mtime -22 to find all files that have been modified in the 
+last 21 days. The documentation found under man find describes that 
+the numerical argument of -22 means it will find any file that has been 
+modified strictly less than 22 days, so not including any file that was 
+modified 22 days ago or above. 
+
+7. Here are all of my directories that have been modified in the last 
+3 weeks:
+   .
+   ./Desktop
+   ./Desktop/desktop.ini
+   ./Desktop/Google Chrome.lnk
+   ./Documents
+   ./Downloads
+   ./Downloads/desktop.ini
+   ./Downloads/supp1.zip
+   ./Downloads/supp1 (1).zip
+   ./Downloads/FoxitReader802_enu_Setup_Prom.exe
+   ./.bash_history
+   ./.cache/abrt
+   ./.cache/abrt/lastnotification
+   ./.Xauthority
+   ./.emacs.d/auto-save-list
+   ./.emacs.d/auto-save-list/.saves-22102-lnxsrv04.seas.ucla.edu~
+   ./.emacs.d/auto-save-list/.saves-14776-lnxsrv07.seas.ucla.edu~
+   ./.viminfo
+   ./.lesshst
+   ./#test#
+   ./.#ans1.txt
+   ./#ans1.txt#
+   ./ans1.txt
+
+8. I first used whereis find to locate the directory it was under (bin). 
+Once I navigated to bin, I typed in find . -type l -ls to print out all 
+the symbolic link files in the bin directory. I found 242 symbolic link 
+files in the bin directory.
+
+9. I first navigated to /usr/lib, and then I typed in the command man 
+ls to learn about the ls command. I learned that I could use ls -lt in 
+this directory to find the oldest regular file. I found that the oldest 
+regular file was: drwxr-xr-x.  6 root root    4096 Sep 29  2014 kbd.
+
+10. After I typed the command man locale, I learned that the data is 
+obtained from environment variables. I later typed in man -k locale 
+and found that localedef defines the locale environment, and thus is 
+where the data originates.
+
+11. 
+Buffer-menu-sort              M-x ... RET
+   Sort Tabulated List entries by the column at point.
+sort-columns                  M-x ... RET
+   Sort lines in region alphabetically by a certain range of columns.
+sort-fields                   M-x ... RET
+   Sort lines in region lexicographically by the ARGth field of each
+   line.
+sort-lines                    M-x ... RET
+   Sort lines in region alphabetically; argument means descending
+   order.
+sort-numeric-fields           M-x ... RET
+   Sort lines in region numerically by the ARGth field of each line.
+sort-pages                    M-x ... RET
+   Sort pages in region alphabetically; argument means descending
+   order.
+sort-paragraphs               M-x ... RET
+   Sort paragraphs in region alphabetically; argument means descending
+   order.
+sort-regexp-fields            M-x ... RET
+   Sort the text in the region region lexicographically.
+tabulated-list-col-sort       M-x ... RET
+   Sort Tabulated List entries by the column of the mouse click E.
+tabulated-list-sort           M-x ... RET
+   Sort Tabulated List entries by the column at point.
+
+I used C-h a sort to use the apropos command under the help functionality 
+of emacs in order to show commands that matched the string sort.
+
+12. 
+C-M-a - places cursor at beginning of line
+C-M-b - places cursor backwards by one space
+C-M-c - exits from innermost recursive edit or minibuffer
+C-M-d - forward deletes
+C-M-e - places cursor at the end of the line
+C-M-f - places cursor forwards by one space
+C-M-g - does not exist
+C-M-h - marks function
+
+13. C-g runs the command keyboard-quit function. This signals a 'quit' 
+condition, and this action happens immediately after the keystroke is 
+pressed. It will create a noise in the editor application. 
+
+14. By running the C-h f yank command, I learned that yank reinserts 
+the most recently yanked or killed stretch of text.
+
+15. 
+/usr/bin:
+  total used in directory 292672 available 13979564
+  dr-xr-xr-x.   2 root root       69632 Mar  2 11:07 .
+  drwxr-xr-x.  15 root root        4096 Dec 22 10:48 ..
+
+Once I navigated into the /usr/bin directory, I used the command 
+ls -l > ~/lsAssign1Text.txt to write the ls -l output into a text 
+file. Then, I used emacs and typed C-h d /usr/bin and then 
+C-x C-s ~/lsAssign1Text2.txt to save the emacs directory output 
+into another text file. Then, I used an online text comparing 
+software to obtain my answer. The emacs dired command lists a 
+few more files than the ls -l command because the dired command 
+also lists some subdirectories. 
+
+

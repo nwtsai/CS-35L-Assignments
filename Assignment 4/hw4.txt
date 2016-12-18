@@ -1,0 +1,88 @@
+1. This file will log the actions required for homework.
+
+2. I typed
+  git clone git://git.savannah.gnu.org/diffutils.git diffutils-homework4
+to copy the repository into my local directory under a new name.
+
+Then, I navigated into the directory with
+  cd diffutils-homework4
+and then used this command to check out version 3.0 into a new branch:
+  git checkout -b 'quote' 'v3.0'
+
+3. Using quote-3.0-patch.txt as my input, I typed:
+  patch -p1 < ../quote-3.0-patch.txt
+to apply the patch. Here is the output:
+
+patching file src/cmp.c
+patching file src/diff.c
+patching file src/diff3.c
+patching file src/dir.c
+patching file src/sdiff.c
+patching file src/util.c
+
+4. I learned about the command C-x 4 a from the link provided.
+
+5. I typed:
+  emacs C-x 4 a
+to open a new file called ChangeLog. I added documentation about the
+six files that the patch applied to, describing which lines were
+reverted or changed and detailed the intention behind the modification.
+
+6. To commit the changes, I typed:
+  git commit -aF ChangeLog
+
+7. To generate the file formatted-patch.txt, I typed:
+  git format-patch -1 --stdout > formatted-patch.txt
+
+8. My partner for this lab is Mr. Andrew Arifin.
+Name: Andrew Arifin
+File: AF-formatted-patch.txt
+UID: 604612135
+
+I typed this command to checkout a new branch:
+  git checkout -b 'partner' 'v3.0'
+
+Next, I want to apply Andrew's patch. I use the command:
+  git am AF-formatted-patch.txt
+
+Now, I want to check that my partner's patch worked. I type:
+  
+  ./boostrap
+  ./configure
+  make
+  make check
+
+The build succeeded and diff works as it was intended to.
+None of the outputted text had grave accents.
+
+9. I typed
+  make distdir
+  cd diffutils-3.0.2-033c
+  cat < ChangeLog
+
+I saw my partner's entry in the ChangeLog:
+
+2016-10-18 Andrew Darryl Arifin <arifin@lnxsrv02.seas.ucla.edu>
+		* Update source code of .c files, removing "`" 
+                  characters
+
+10. I navigated back to my assign4 directory with
+  cd ../ cd ../
+To copy the emacs directory to my local working directory, I typed:
+  git clone ~eggert/src/gnu/emacs
+
+In order to get gitk to work, I first downloaded X11. Then, I logged
+in with ssh -X username@lnxsrv02.seas.ucla.edu
+
+I navigated to the emacs folder with:
+  cd CS35L/assign4/emacs
+Then, I typed: 
+  gitk
+and scrolled until I found the newest merge not newer than 2015-01-25.
+I saved a screenshot of my window under gitk-screenshot.png
+
+It was labeled
+
+Merge branch ‘master’ into xwidget
+
+

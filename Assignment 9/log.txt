@@ -1,0 +1,50 @@
+I booted Ubuntu from disk on a SEASNet Machine
+
+Install OpenSSH:
+I opened the termainal, and set up and downloaded OpenSSH
+Command: sudo apt-get install openssh-server
+Command: sudo apt-get install openssh-client
+ 
+====================================================================
+
+Client Steps:
+
+Generate a keypair
+Command: ssh-keygen
+
+Find current IP Address
+Command: ifconfig
+IP Address: 
+
+Copy my public key to the server for key-based authentication
+Command: ssh-copy-id -i nathantsai@127.0.0.1
+
+Add a private key to authentication agent
+Command: ssh-add
+
+Now I want to SSH to the server
+Command: ssh nathantsai@127.0.0.1
+Command: ssh -X nathantsai@127.0.0.1
+
+Now I want to test the connection by running a command on the remote host
+Command: firefox
+
+====================================================================
+
+Server Steps:
+Generate a keypair
+Command: ssh-keygen
+
+Make an account for the client on the server
+Command: sudo useradd -d /home/<homedirectoryname> -m <username>
+sudo passwd <username>
+
+Make a new .ssh directory for the new user
+Command: cd /home/homedirectoryname
+Command: sudo mkdir .ssh
+
+Modify ownership and permission on .ssh directory
+Command: chown -R username.ssh
+Command: chmod 700 .ssh
+
+Now we test to see if my partner can log in and run a command

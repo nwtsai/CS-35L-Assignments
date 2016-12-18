@@ -1,0 +1,34 @@
+Each subwindow in my screenshot has a different role.
+
+The top left subwindow shows the tree, the different
+branches, and details of the commit/merge message 
+written by the author of the commit.
+
+The upper middle subwindow shows the author of the 
+commit and their information.
+
+The upper right subwindow shows the date and time of 
+which the commit/merge was processed.
+
+The bottom left window gives information about the:
+
+Author
+Committer
+Parent
+Child
+Branches
+Follows
+Precedes
+
+It also gives more information about why the author 
+committed and what changes he/she made.
+
+In the same subwindow, if it's not a merge, under the 
+above information, a preview of the ChangeLog appears.
+
+Also, a preview of some of the lines changed appears 
+below the preview of the ChangeLog, showing the diffs 
+of what was changed.
+
+The bottom right subwindow contains the comments of the 
+commit/merge.

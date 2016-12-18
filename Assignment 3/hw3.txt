@@ -1,0 +1,42 @@
+Q1.
+The line "case_long_iso_time_style:" is actually a goto label. Brady 
+had already removed the goto line, so the label was unnecessary. On 
+the level of functionality, leaving the line would be acceptable. 
+However, this line should be removed, as Brady rightfully did so, 
+because it could be a source of confusion for other programmers 
+trying to read the code. It is always best to remove unnecessary 
+lines in code so that the code can be more easily read.
+
+Q2.
+If your company adopts the patched version of Coreutils instead of the
+old version, you may make the dates of when files are created to be 
+hard to read for non English-speaking people. The old version was readable
+by all people, while the patched version tailors to English-speaking
+people. Furthermore, if some of the company uses commands that rely
+on reading and inputting the old format, this could affect all of
+these commands and could result in many bugs. 
+
+Q3.
+The script doesn't work, because it needs an argument greater than 0 bits. 
+How can a randomline generator script function when there are no lines?
+Furthermore, getrandbits(0) will not work with 0 bits. The script cannot 
+choose lines from an empty sequence, because this will cause undefined
+behavior.
+
+Q4.
+Running the script with python3 generates the following error:
+
+Input: /usr/local/cs/bin/python3 randline.py -file
+Output: File "randline.py", line 65
+	except IOError as (errno, strerror):
+                      ^
+      SyntaxError: invalid syntax
+
+This happens because the newer version of python, python3, has new syntax
+rules. In fact, it does not accept the arguments of the IOError as
+(errno, strerror).  
+Running the script with python2 results in the program running as it was
+intended to, returning no errors. This probably means that the person
+who wrote randline.py wrote it before python3 was released. Programmers
+must remember to read up on language updates and update their code
+correspondingly to avoid errors like the one shown above.

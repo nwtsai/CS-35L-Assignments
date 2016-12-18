@@ -1,0 +1,89 @@
+I first used 
+  wget ftp://ftp.gnu.org/gnu/coreutils/coreutils-7.6.tar.gz 
+to grab the coreutils-7.6 source files into my local directory. 
+
+To unzip the file, I ran the command 
+  tar -zxvf coreutils-7.6.tar.gz 
+
+After navigating to the directory coreutils-7.6 by typing in 
+  cd coreutils-7.6
+I used 
+  mkdir mybin 
+to create my own directory. 
+
+Then, I used the command 
+  ./configure --prefix=/u/cs/ugrad/tsain/CS35L/assign3/coreutils-7.6/mybin
+to configure the path.
+
+In the coreutils-7.6 directory, I typed 
+  make 
+to compile the files and 
+  make install 
+to install all the files.
+
+I then typed the command 
+  export LC_ALL='en_US.UTF-8' 
+and 
+  cd mybin 
+to change the locale and directory.
+
+Then, I typed 
+  ./ls -l /bin/bash 
+to reproduce the bug:
+-rwxr-xr-x 1 root root 960392 2015-06-12 8:17 /bin/bash
+
+I went to Brady's patch on the internet, and made a file by typing
+  emacs mypatch_ls 
+in the coreutils-7.6 directory, copying and pasting Brady's patch 
+into the file.
+ 
+I then typed in 
+  patch -p1 < mypatch_ls 
+to apply the patch, modifying the ls file.
+
+I then typed 
+  make 
+to recompile the program.
+
+To get back to the assign3 directory, I typed 
+  cd ../
+
+To compare recently modified file using both ls commands:
+
+I used the command 
+  ./mybin/bin/ls -l ./coreutils-7.6.tar.gz 
+and got the buggy format:
+-rw-r--r-- 1 tsain csugrad 10014650 2016-10-10 16:14 ./coreutils-7.6.tar.gz
+
+I used the command 
+  ./coreutils-7.6/src/ls -l ./coreutils-7.6.tar.gz 
+and got the correct format:
+-rw-r--r-- 1 tsain csugrad 10014650 Oct 10 16:14 ./coreutils-7.6.tar.gz
+
+Now, to compare the one-year-old file and its varying formats:
+
+I used the command 
+  emacs yearOldFile
+Then I typed something into the file, and then pressed 
+  C-x C-c 
+to quit and save the file.
+To change the date of the file, I used 
+  touch -t 1510100000 yearOldFile
+
+Then I used 
+  ./mybin/src/ls -l ./yearOldFile 
+to get the buggy format:
+-rw-r--r-- 1 tsain csugrad 32 2015-10-10 00:00 ./yearOldFile
+
+I used the command 
+  ./coreutils-7.6/src/ls -l ./yearOldFile 
+to get the correct format:
+-rw-r--r-- 1 tsain csugrad 32 Oct 10  2015 ./yearOldFile
+
+The difference between the recently modified files and year old one 
+is that post-patch formatting includes the timestamp only if the file 
+was created in the same year. If the file was created in a different 
+year, then it will exclude the timestamp and will replace the time with 
+just the year that the file was created. If the file was created in the 
+same year as the current year, the post-patch format will exclude the 
+year, and will display the timestamp of its creation instead.
